@@ -1,1 +1,1 @@
-# ISTS_quals
+# Hi red team, pls be nice 🐒
