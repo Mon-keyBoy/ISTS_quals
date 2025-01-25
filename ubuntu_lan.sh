@@ -7,8 +7,6 @@ fi
 
 # make backup dirs, hide them urself
 mkdir -p /docker_backups
-mkdir -p /backs_bf_reinstall
-mkdir -p /backs_af_reinstall
 
 packages=(
   software-properties-common 
@@ -61,6 +59,7 @@ apt purge -y openssh-server
 
 #install tools that you want/need
 apt install -y vim
+apt install -y nmap
 apt install -y auditd
 apt install debsums -y
 systemctl enable auditd
@@ -124,10 +123,17 @@ nft flush ruleset
 
 
 # Backup Docker data
+systemctl stop docker
 DOCKER_BACKUP_DIR="/docker_backups"
 mkdir -p "$DOCKER_BACKUP_DIR"
 cp -r /var/lib/docker "$DOCKER_BACKUP_DIR"
 cp -r /etc/docker "$DOCKER_BACKUP_DIR"
+cp -r $HOME/.docker/ "$DOCKER_BACKUP_DIR"
+systemctl start docker
+systemctl enable docker
+
+
+
 
 #containers
 for container in $(docker ps -aq); do
@@ -232,6 +238,9 @@ nft list ruleset > /nftables.conf
 #ensure the nftables service loads the rules on boot
 systemctl start nftables
 systemctl enable nftables
+nft flush table inet filter
+nft delete table inet filter
+nft -f nftables.conf
 
 
 
